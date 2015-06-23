@@ -95,7 +95,6 @@
 }
 
 -(void)buttonPress:(NSButton *)button {
-    int i; // Loop counter.
     // Create the File Open Dialog class.
     NSOpenPanel* openDlg = [NSOpenPanel openPanel];
     
@@ -108,11 +107,11 @@
     
     // Display the dialog.  If the OK button was pressed,
     // process the files.
-    if ( [openDlg runModalForDirectory:nil file:nil] == NSOKButton )
+    if ( [openDlg runModal] == NSModalResponseOK)
     {
         // Get an array containing the full filenames of all
         // files and directories selected.
-        NSArray* files = [openDlg filenames];
+        NSArray* files = [openDlg URLs];
         self.dataList = [files mutableCopy];
         [self.tableView reloadData];
     }
@@ -124,10 +123,14 @@
         return;
     }
     
-    NSMutableArray  *imageNames = [NSMutableArray array];
+    for (NSInteger item = 0; item < self.dataList.count; item ++) {
+        NSURL *url = [self.dataList objectAtIndex:item];
+        [self.dataList replaceObjectAtIndex:item withObject:[url absoluteString]];
+    }
     
-    for (NSString *pathItem in self.dataList) {
-        NSMutableArray *paths = [[pathItem componentsSeparatedByString:@"/"] mutableCopy];
+    NSMutableArray  *imageNames = [NSMutableArray array];
+    for (NSString *pathString in self.dataList) {
+        NSMutableArray *paths = [[pathString componentsSeparatedByString:@"/"] mutableCopy];
         NSString *imageFullName = [paths lastObject];
         NSMutableCharacterSet *charSet = [NSMutableCharacterSet whitespaceCharacterSet];
         [charSet addCharactersInString:@".jpg"];
@@ -169,7 +172,7 @@
         NSString *imageName = [imageNames objectAtIndex:i];
         [[NSOperationQueue mainQueue] addOperationWithBlock:^{
             NSString* fileName = [self.dataList objectAtIndex:i];
-            NSImage *image = [[NSImage alloc] initWithContentsOfFile:fileName];
+            NSImage *image = [[NSImage alloc] initWithContentsOfURL:[NSURL URLWithString:fileName]];
             paths = [NSMutableArray arrayWithArray:copyPath];
             for (NSInteger index = 1; index <=3; index++) {
                 NSImage *image2 =  [NSImage imageWithSize:NSMakeSize(image.size.width / index, image.size.height / index) flipped:YES drawingHandler:^BOOL(NSRect dstRect) {
@@ -195,9 +198,6 @@
             }
         }];
   }
-    
-    [self.dataList removeAllObjects];
-    [self.tableView reloadData];
 }
 
 - (void)setRepresentedObject:(id)representedObject {
