@@ -125,7 +125,7 @@
     
     for (NSInteger item = 0; item < self.dataList.count; item ++) {
         NSURL *url = [self.dataList objectAtIndex:item];
-        [self.dataList replaceObjectAtIndex:item withObject:[url absoluteString]];
+        [self.dataList replaceObjectAtIndex:item withObject:[url resourceSpecifier]];
     }
     
     NSMutableArray  *imageNames = [NSMutableArray array];
@@ -172,7 +172,7 @@
         NSString *imageName = [imageNames objectAtIndex:i];
         [[NSOperationQueue mainQueue] addOperationWithBlock:^{
             NSString* fileName = [self.dataList objectAtIndex:i];
-            NSImage *image = [[NSImage alloc] initWithContentsOfURL:[NSURL URLWithString:fileName]];
+            NSImage *image = [[NSImage alloc] initWithContentsOfFile:fileName];
             paths = [NSMutableArray arrayWithArray:copyPath];
             for (NSInteger index = 1; index <=3; index++) {
                 NSImage *image2 =  [NSImage imageWithSize:NSMakeSize(image.size.width / index, image.size.height / index) flipped:YES drawingHandler:^BOOL(NSRect dstRect) {
@@ -183,7 +183,7 @@
                 NSBitmapImageRep *bitmaps = [[NSBitmapImageRep alloc] initWithData:[image2 TIFFRepresentation]];
                 NSData *newImageData = nil;
                 
-                newImageData = [bitmaps representationUsingType:NSPNGFileType properties:[NSDictionary dictionaryWithObjectsAndKeys:@(0.2),NSImageCompressionFactor,nil]];
+                newImageData = [bitmaps representationUsingType:NSPNGFileType properties:[NSDictionary dictionaryWithObjectsAndKeys:@(1),NSImageCompressionFactor,nil]];
                 NSString *imagePath = nil;
                 if ([paths count] == 1) {
                     imagePath = [NSString stringWithFormat:@"%@/%@.png",[paths lastObject],imageName];
